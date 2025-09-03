@@ -1,0 +1,100 @@
+<!-- templates/new_request.html -->
+{% extends "layout.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Create a New Request</h1>
+    <form method="POST" id="request-form">
+        <div class="mb-4">
+            <label for="app_code" class="block text-sm font-medium text-gray-700">Application Code (e.g., GIPS)</label>
+            <input type="text" id="app_code" name="app_code" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+
+        <div class="mb-6">
+            <label for="request_type" class="block text-sm font-medium text-gray-700">Request Type</label>
+            <select id="request_type" name="request_type" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="create_topic">Create Topic</option>
+                <option value="producer_acl">Producer Permission</option>
+                <option value="consumer_acl">Consumer Permission (Topic & Group)</option>
+                <option value="consumer_group_acl">Consumer Group Permission (Only)</option>
+            </select>
+        </div>
+        
+        <!-- Fields for Create Topic -->
+        <div id="create_topic_fields" class="space-y-4">
+            <h3 class="text-lg font-medium text-gray-800 border-b pb-2">Topic Details</h3>
+            <div>
+                <label for="topic_name" class="block text-sm font-medium text-gray-700">Topic Name (without prefix)</label>
+                <input type="text" id="topic_name" name="topic_name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+            </div>
+            <div>
+                <label for="partitions" class="block text-sm font-medium text-gray-700">Partitions</label>
+                <input type="number" id="partitions" name="partitions" value="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+            </div>
+            <div>
+                <label for="replication" class="block text-sm font-medium text-gray-700">Replication Factor</label>
+                <input type="number" id="replication" name="replication" value="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+            </div>
+        </div>
+
+        <!-- Fields for ACLs -->
+        <div id="acl_fields" class="space-y-4 hidden">
+            <h3 class="text-lg font-medium text-gray-800 border-b pb-2">ACL Details</h3>
+             <div id="acl_topic_name_container">
+                <label for="acl_topic_name" class="block text-sm font-medium text-gray-700">Topic Name (without prefix)</label>
+                <input type="text" id="acl_topic_name" name="acl_topic_name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+            </div>
+            <div class="pt-4">
+                <label for="principal" class="block text-sm font-medium text-gray-700">Principal (e.g., service-account-name)</label>
+                <input type="text" id="principal" name="principal" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+            </div>
+        </div>
+
+        <!-- Consumer Group Field -->
+        <div id="consumer_group_field" class="space-y-4 hidden mt-4">
+             <div>
+                <label for="consumer_group" class="block text-sm font-medium text-gray-700">Consumer Group ID</label>
+                <input type="text" id="consumer_group" name="consumer_group" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                Submit Request
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('request_type').addEventListener('change', function() {
+        const topicFields = document.getElementById('create_topic_fields');
+        const aclFields = document.getElementById('acl_fields');
+        const consumerGroupField = document.getElementById('consumer_group_field');
+        const aclTopicNameContainer = document.getElementById('acl_topic_name_container');
+
+        // Hide all optional sections first
+        topicFields.classList.add('hidden');
+        aclFields.classList.add('hidden');
+        consumerGroupField.classList.add('hidden');
+        
+        // Show/hide the topic name field within the ACL section
+        aclTopicNameContainer.style.display = 'block';
+
+        if (this.value === 'create_topic') {
+            topicFields.classList.remove('hidden');
+        } else if (this.value === 'producer_acl') {
+            aclFields.classList.remove('hidden');
+        } else if (this.value === 'consumer_acl') {
+            aclFields.classList.remove('hidden');
+            consumerGroupField.classList.remove('hidden');
+        } else if (this.value === 'consumer_group_acl') {
+            aclFields.classList.remove('hidden');
+            consumerGroupField.classList.remove('hidden');
+            aclTopicNameContainer.style.display = 'none'; // Hide topic for group-only ACL
+        }
+    });
+
+    // Trigger change event on page load to set initial state
+    document.getElementById('request_type').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

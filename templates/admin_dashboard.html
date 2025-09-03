@@ -1,0 +1,94 @@
+<!-- templates/admin_dashboard.html -->
+{% extends "layout.html" %}
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-lg">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Admin Dashboard</h1>
+    
+    <!-- Pending Requests -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold mb-4 text-yellow-600">Pending Approval</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-3 px-6 text-left">ID</th>
+                        <th class="py-3 px-6 text-left">User</th>
+                        <th class="py-3 px-6 text-left">App Code</th>
+                        <th class="py-3 px-6 text-left">Type</th>
+                        <th class="py-3 px-6 text-left">Date</th>
+                        <th class="py-3 px-6 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for req in pending %}
+                    <tr>
+                        <td class="py-4 px-6">{{ req.id }}</td>
+                        <td class="py-4 px-6">{{ req.username }}</td>
+                        <td class="py-4 px-6">{{ req.app_code }}</td>
+                        <td class="py-4 px-6">{{ req.request_type.replace('_', ' ') | title }}</td>
+                        <td class="py-4 px-6">{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="py-4 px-6 flex items-center space-x-2">
+                            <a href="{{ url_for('view_request', request_id=req.id) }}" class="text-blue-600 hover:underline">View</a>
+                            <form action="{{ url_for('approve_request', request_id=req.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve and execute this request?');">
+                                <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 text-sm">Approve</button>
+                            </form>
+                            <form action="{{ url_for('reject_request', request_id=req.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this request?');">
+                                <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center py-4">No pending requests.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Processed Requests -->
+    <div>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700">Recently Processed</h2>
+        <!-- Same table structure as user dashboard -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-3 px-6 text-left">ID</th>
+                        <th class="py-3 px-6 text-left">User</th>
+                        <th class="py-3 px-6 text-left">Type</th>
+                        <th class="py-3 px-6 text-left">Status</th>
+                        <th class="py-3 px-6 text-left">Processed By</th>
+                        <th class="py-3 px-6 text-left">Date</th>
+                        <th class="py-3 px-6 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for req in processed %}
+                    <tr>
+                        <td class="py-4 px-6">{{ req.id }}</td>
+                        <td class="py-4 px-6">{{ req.username }}</td>
+                        <td class="py-4 px-6">{{ req.request_type.replace('_', ' ') | title }}</td>
+                        <td class="py-4 px-6">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if req.status == 'Executed' %} bg-green-100 text-green-800
+                            {% elif req.status == 'Rejected' or req.status == 'Failed' %} bg-red-100 text-red-800
+                            {% else %} bg-gray-100 text-gray-800
+                            {% endif %}">
+                                {{ req.status }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-6">{{ req.approved_by }}</td>
+                        <td class="py-4 px-6">{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="py-4 px-6">
+                            <a href="{{ url_for('view_request', request_id=req.id) }}" class="text-indigo-600 hover:text-indigo-900">View Details</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center py-4">No processed requests found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+<!-- templates/view_request.html -->
+{% extends "layout.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <a href="{{ url_for('index') }}" class="text-indigo-600 hover:underline mb-6 block">&larr; Back to Dashboard</a>
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">Request #{{ request.id }} Details</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gray-50 p-4 rounded-md">
+            <h3 class="font-semibold text-gray-600">Requestor:</h3>
+            <p>{{ request.username }}</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <h3 class="font-semibold text-gray-600">Request Date:</h3>
+            <p>{{ request.created_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <h3 class="font-semibold text-gray-600">Application Code:</h3>
+            <p>{{ request.app_code }}</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <h3 class="font-semibold text-gray-600">Request Type:</h3>
+            <p>{{ request.request_type.replace('_', ' ') | title }}</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <h3 class="font-semibold text-gray-600">Status:</h3>
+            <p class="font-bold 
+            {% if request.status == 'Pending' %} text-yellow-600 
+            {% elif request.status == 'Executed' %} text-green-600
+            {% elif request.status == 'Rejected' or request.status == 'Failed' %} text-red-600
+            {% endif %}">{{ request.status }}</p>
+        </div>
+        {% if request.approved_by %}
+        <div class="bg-gray-50 p-4 rounded-md">
+            <h3 class="font-semibold text-gray-600">Processed By:</h3>
+            <p>{{ request.approved_by }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-2">Request Parameters</h2>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <ul class="list-disc list-inside">
+                {% for key, value in details.items() %}
+                    <li><strong>{{ key.replace('_', ' ') | title }}:</strong> {{ value }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    {% if request.execution_logs %}
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-2">Execution Logs</h2>
+        <div class="bg-gray-900 text-white p-4 rounded-md font-mono text-sm overflow-x-auto">
+            <pre><code>{{ request.execution_logs }}</code></pre>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
